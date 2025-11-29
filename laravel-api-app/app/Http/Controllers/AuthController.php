@@ -16,12 +16,15 @@ class AuthController extends Controller
         $fields = $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed'
+            'password' => 'required|confirmed',
+            'role' => 'nullable|in:customer,seller,employee',
         ]);
+
+        $fields['role'] = $fields['role'] ?? 'customer';
 
         $user = User::create($fields);
 
-        $token = $user->createToken($request->name);
+        $token = $user->createToken($user->first_name);
 
         return [
             'user' => $user,
@@ -71,7 +74,7 @@ class AuthController extends Controller
             // ];
         }
 
-        $token = $user->createToken($user->name);
+        $token = $user->createToken($user->first_name);
 
         return [
             'user' => $user,

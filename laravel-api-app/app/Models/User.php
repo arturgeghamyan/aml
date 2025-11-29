@@ -21,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -41,7 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            // 'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -49,5 +50,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function blogs()
     {
         return $this->hasMany(Blog::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 }

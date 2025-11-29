@@ -12,10 +12,17 @@ const authStore = useAuthStore()
 
       <div v-if="authStore.user" class="flex items-center space-x-6">
         <p class="text-sm text-slate-300">
-          Welcome back {{ authStore.user.name }}
+          Welcome back {{ authStore.user.first_name }}
         </p>
-        <RouterLink :to="{ name: 'create' }" class="nav-link">
+        <!-- <RouterLink :to="{ name: 'create' }" class="nav-link">
           New Blog
+        </RouterLink> -->
+        <RouterLink
+          v-if="authStore.user.role === 'seller'"
+          :to="{ name: 'product-create' }"
+          class="nav-link"
+        >
+          New Product
         </RouterLink>
         <form @submit.prevent="authStore.logout">
           <button class="nav-link">Logout</button>

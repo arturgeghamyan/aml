@@ -36,7 +36,7 @@ export const useAuthStore = defineStore("authStore", {
         this.errors = {};
         localStorage.setItem("token", data.token);
         this.user = data.user;
-        this.router.push({ name: "verify-email-notification" });
+        // this.router.push({ name: "verify-email-notification" });
       }
     },
     /******************* Logout user *******************/
