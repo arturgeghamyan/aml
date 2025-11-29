@@ -8,6 +8,8 @@ import LoginView from "../views/Auth/LoginView.vue";
 import CreateView from "@/views/Blogs/CreateView.vue";
 import ShowView from "@/views/Blogs/ShowView.vue";
 import UpdateView from "@/views/Blogs/UpdateView.vue";
+import ProductCreateView from "@/views/Products/ProductCreateView.vue";
+import ProductShowView from "@/views/Products/ProductShowView.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const router = createRouter({
@@ -59,6 +61,17 @@ const router = createRouter({
       component: UpdateView,
       meta: { auth: true, requiresEmailVerified: true },
     },
+    {
+      path: "/products/create",
+      name: "product-create",
+      component: ProductCreateView,
+      meta: { auth: true, requiresEmailVerified: true, role: "seller" },
+    },
+    {
+      path: "/products/:id",
+      name: "product-show",
+      component: ProductShowView,
+    },
   ],
 });
 
@@ -83,6 +96,10 @@ router.beforeEach(async (to, from) => {
 
   if (!authStore.user && to.meta.auth) {
     return { name: "login" };
+  }
+
+  if (to.meta.role && authStore.user && authStore.user.role !== to.meta.role) {
+    return { name: "home" };
   }
 });
 
