@@ -10,6 +10,10 @@ import ShowView from "@/views/Blogs/ShowView.vue";
 import UpdateView from "@/views/Blogs/UpdateView.vue";
 import ProductCreateView from "@/views/Products/ProductCreateView.vue";
 import ProductShowView from "@/views/Products/ProductShowView.vue";
+import MyOrdersView from "@/views/Orders/MyOrdersView.vue";
+import ReturnRequestsView from "@/views/Returns/ReturnRequestsView.vue";
+import FulfillmentView from "@/views/Fulfillment/FulfillmentView.vue";
+import EmployeeStatsView from "@/views/Stats/EmployeeStatsView.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const router = createRouter({
@@ -71,6 +75,30 @@ const router = createRouter({
       path: "/products/:id",
       name: "product-show",
       component: ProductShowView,
+    },
+    {
+      path: "/orders",
+      name: "orders",
+      component: MyOrdersView,
+      meta: { auth: true, role: "customer" },
+    },
+    {
+      path: "/returns",
+      name: "returns",
+      component: ReturnRequestsView,
+      meta: { auth: true, role: "employee" },
+    },
+    {
+      path: "/fulfillment",
+      name: "fulfillment",
+      component: FulfillmentView,
+      meta: { auth: true, role: "employee" },
+    },
+    {
+      path: "/stats",
+      name: "stats",
+      component: EmployeeStatsView,
+      meta: { auth: true, role: "employee" },
     },
   ],
 });

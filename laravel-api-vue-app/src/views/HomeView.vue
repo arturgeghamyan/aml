@@ -3,8 +3,9 @@ import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useProductsStore } from "@/stores/products";
 import { useAuthStore } from "@/stores/auth";
+import placeholderImage from "@/assets/product-placeholder.jpg";
 
-const { getAllProducts, getCategories } = useProductsStore();
+const { getAllProducts, getCategories, getBestSellers } = useProductsStore();
 const authStore = useAuthStore();
 const products = ref([]);
 const pagination = ref({});
@@ -14,6 +15,7 @@ const categoryId = ref("");
 const priceMin = ref("");
 const priceMax = ref("");
 const categories = ref([]);
+const topProducts = ref([]);
 
 const changePage = async (page) => {
   currentPage.value = page;
@@ -42,6 +44,7 @@ watch(() => authStore.user, () => {
 
 onMounted(async () => {
   categories.value = await getCategories();
+  topProducts.value = await getBestSellers(3);
   await fetchProducts();
 });
 </script>
@@ -75,16 +78,38 @@ onMounted(async () => {
           </option>
         </select>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-sm text-slate-600 mb-1 block" for="price_min">Min price</label>
-          <input id="price_min" type="number" step="0.01" min="0" v-model="priceMin" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-600 mb-1 block" for="price_max">Max price</label>
-          <input id="price_max" type="number" step="0.01" min="0" v-model="priceMax" />
-        </div>
-      </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm text-slate-600 mb-1 block" for="price_min">Min price</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">$</span>
+                <input
+                  id="price_min"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  v-model="priceMin"
+                  class="pl-7 w-full"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="text-sm text-slate-600 mb-1 block" for="price_max">Max price</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">$</span>
+                <input
+                  id="price_max"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  v-model="priceMax"
+                  class="pl-7 w-full"
+                  placeholder="9999.99"
+                />
+              </div>
+            </div>
+          </div>
       <div class="md:col-span-4 flex gap-3">
         <button class="primary-btn w-28">Apply</button>
         <button
@@ -103,6 +128,38 @@ onMounted(async () => {
       </div>
     </form>
 
+    <section class="mb-8 bg-white border border-slate-200 rounded-lg shadow-sm p-5">
+      <h2 class="text-xl font-bold text-slate-900 mb-4">Top Products</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div
+          v-for="item in topProducts"
+          :key="item.id || item.product_id"
+          class="border border-slate-100 rounded-lg p-4 space-y-2"
+        >
+          <img :src="placeholderImage" alt="" class="w-full h-32 object-cover rounded" />
+          <p class="font-semibold text-slate-800">{{ item.product_name }}</p>
+          <p class="text-sm text-slate-600 line-clamp-2">
+            {{ item.product_description }}
+          </p>
+          <p class="text-sm font-semibold text-slate-900">
+            ${{ Number(item.product_price || 0).toFixed(2) }}
+          </p>
+          <p class="text-xs text-slate-600">
+            Sold: {{ item.total_units_sold ?? 0 }}
+          </p>
+          <RouterLink
+            :to="{ name: 'product-show', params: { id: item.id || item.product_id } }"
+            class="text-blue-500 text-sm font-semibold underline"
+          >
+            View
+          </RouterLink>
+        </div>
+        <p v-if="topProducts.length === 0" class="text-slate-500 text-sm">
+          No top products yet.
+        </p>
+      </div>
+    </section>
+
     <h1 class="text-3xl font-bold text-center mb-10">
       {{ products.length <= 0 ? "There are no" : "" }} Products
     </h1>
@@ -116,6 +173,11 @@ onMounted(async () => {
         :key="product.id || product.product_id"
         class="bg-white shadow-md rounded-lg overflow-hidden border border-slate-100"
       >
+        <img
+          :src="placeholderImage"
+          alt="Product placeholder"
+          class="w-full h-48 object-cover bg-slate-100"
+        />
         <div class="p-6 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-800">

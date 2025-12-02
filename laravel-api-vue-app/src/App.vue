@@ -24,6 +24,34 @@ const authStore = useAuthStore()
         >
           New Product
         </RouterLink>
+        <RouterLink
+          v-if="authStore.user.role === 'customer'"
+          :to="{ name: 'orders' }"
+          class="nav-link"
+        >
+          My Orders
+        </RouterLink>
+        <RouterLink
+          v-if="authStore.user.role === 'employee'"
+          :to="{ name: 'returns' }"
+          class="nav-link"
+        >
+          Return Requests
+        </RouterLink>
+        <RouterLink
+          v-if="authStore.user.role === 'employee'"
+          :to="{ name: 'fulfillment' }"
+          class="nav-link"
+        >
+          Fulfillment
+        </RouterLink>
+        <RouterLink
+          v-if="authStore.user.role === 'employee'"
+          :to="{ name: 'stats' }"
+          class="nav-link"
+        >
+          Stats
+        </RouterLink>
         <form @submit.prevent="authStore.logout">
           <button class="nav-link">Logout</button>
         </form>

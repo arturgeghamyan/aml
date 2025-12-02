@@ -6,6 +6,16 @@ export const useProductsStore = defineStore("productsStore", {
     product: null,
   }),
   actions: {
+    async getBestSellers(limit = 3) {
+      const res = await fetch(`/api/products/best-sellers?limit=${limit}`);
+      const data = await res.json();
+      if (res.ok && !data.errors) {
+        return data.products ?? [];
+      }
+      this.errors = data.errors || { message: data.message || ["Unable to load best sellers"] };
+      return [];
+    },
+
     async getCategories() {
       const res = await fetch("/api/categories");
       const data = await res.json();
