@@ -24,6 +24,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
     ];
 
+    protected $table = 'user_table';
+    protected $primaryKey = 'user_id';
+    public $timestamps = false;
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -55,5 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(OrderTable::class, 'customer_id', 'id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -12,13 +13,13 @@ class ProductController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware('auth:sanctum', except: ['index', 'show']),
+            new Middleware('auth:sanctum', except: ['index', 'show', 'bestSellers']),
         ];
     }
 
     public function index()
     {
-        $query = Product::with(['category', 'seller'])->latest();
+        $query = Product::with(['category', 'seller']);
 
         $user = auth('sanctum')->user();
         if ($user?->role === 'employee') {
@@ -40,19 +41,20 @@ class ProductController extends Controller implements HasMiddleware
             });
         }
 
-        if ($categoryId = request()->input('category_id')) {
+        $categoryId = request()->input('category_id');
+        if ($categoryId !== null && $categoryId !== '') {
             $query->where('category_id', $categoryId);
         }
 
         $priceMin = request()->input('price_min');
         $priceMax = request()->input('price_max');
 
-        if ($priceMin !== null && $priceMin !== '') {
-            $query->where('product_price', '>=', $priceMin);
+        if (is_numeric($priceMin)) {
+            $query->where('product_price', '>=', (float) $priceMin);
         }
 
-        if ($priceMax !== null && $priceMax !== '') {
-            $query->where('product_price', '<=', $priceMax);
+        if (is_numeric($priceMax)) {
+            $query->where('product_price', '<=', (float) $priceMax);
         }
 
         return $query->paginate(request()->integer('paginate', 9));
@@ -144,5 +146,20 @@ class ProductController extends Controller implements HasMiddleware
         $product->update(['product_status' => 'active']);
 
         return ['product' => $product->load(['category', 'seller'])];
+    }
+
+    public function bestSellers()
+    {
+        $limit = request()->integer('limit', 5);
+
+        $top = Product::selectRaw('product.product_id, product.product_name, product.product_description, product.product_price, product.product_brand, SUM(order_item.quantity) as total_units_sold')
+            ->join('order_item', 'order_item.product_id', '=', 'product.product_id')
+            ->where('product.product_status', 'active')
+            ->groupBy('product.product_id', 'product.product_name', 'product.product_description', 'product.product_price', 'product.product_brand')
+            ->orderByDesc('total_units_sold')
+            ->limit($limit)
+            ->get();
+
+        return ['products' => $top];
     }
 }
